@@ -117,6 +117,8 @@ Sources for all data and resources used for the project can be found [here](docu
 ![](documentation/images/projection_robinson.png)
 ![](documentation/images/wind_srfc.png)
 ![](documentation/images/wind_150hPa.png)
+![](documentation/images/atmo.jpg)
+![](documentation/images/no_atmo.jpg)
 ![](documentation/images/snow_mako.png)
 ![](documentation/images/vegetation_virdis.png)
 ![](documentation/images/normal.png)
