@@ -1,0 +1,64 @@
+#version 430 core
+
+layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
+
+#include "common/SceneDataBuffer"
+#include "common/CoordinateConstants"
+#include "common/Projection"
+
+struct Instance {
+    mat4 model;
+    vec4 geoPos;
+};
+
+layout(std430, binding = 0) readonly buffer InputInstanceBuffer {
+    Instance inputInstances[];
+};
+
+layout(std430, binding = 1) writeonly buffer CulledInstanceBuffer {
+    Instance outputInstances[];
+};
+
+#include "common/IndirectElementsCommandBuffer" (BINDING=2)
+
+uniform int instanceCount;
+uniform float modelScale;
+uniform float cullDistanceFactor;
+uniform float meshRadius;
+
+#include "common/Culling"
+
+float maximumScale(mat4 model) {
+    return max(length(model[0].xyz), max(length(model[1].xyz), length(model[2].xyz)));
+}
+
+mat3 surfaceAlignment(vec3 origin) {
+    if (scene.projectionMode != 0) return mat3(1.0);
+
+    vec3 localUp = normalize(origin);
+    vec3 worldUp = vec3(0.0, 0.0, 1.0);
+    if (abs(dot(localUp, worldUp)) > 0.99) worldUp = vec3(0.0, 1.0, 0.0);
+
+    vec3 localRight = normalize(cross(localUp, worldUp));
+    vec3 localForward = cross(localRight, localUp);
+    return mat3(-localRight, localForward, localUp);
+}
+
+void main() {
+    uint id = gl_GlobalInvocationID.x;
+    if (id >= instanceCount) return;
+
+    Instance instance = inputInstances[id];
+    vec3 origin = project(instance.geoPos.xyz, scene.projectionMode);
+    vec3 localOffset = instance.model[3].xyz * modelScale;
+    vec3 worldPos = origin + surfaceAlignment(origin) * localOffset;
+    float radius = meshRadius * modelScale * maximumScale(instance.model);
+
+    // The detailed model is useful only while its rendered scale makes it legible.
+    float maxDistance = max(modelScale, 1.0) * cullDistanceFactor;
+    if (distance(worldPos, scene.viewPos) - radius > maxDistance) return;
+    if (frustumCulling(worldPos, radius)) return;
+
+    uint visibleIndex = atomicAdd(drawCmd.instanceCount, 1);
+    outputInstances[visibleIndex] = instance;
+}

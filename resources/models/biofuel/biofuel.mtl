@@ -1,0 +1,162 @@
+# Blender 4.4.0 MTL File: 'renewables mod.blend'
+# www.blender.org
+
+newmtl base_material
+Ns 1000.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 1
+map_Kd S:/Blender Projects/renewables/renewable-alternative-energy-low-poly/source/palette.png
+
+newmtl base_material.008
+Ns 1000.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 1
+map_Kd S:/Blender Projects/renewables/renewable-alternative-energy-low-poly/source/palette.png
+
+newmtl base_material.009
+Ns 1000.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 1
+map_Kd S:/Blender Projects/renewables/renewable-alternative-energy-low-poly/source/palette.png
+
+newmtl base_material.010
+Ns 1000.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 1
+map_Kd S:/Blender Projects/renewables/renewable-alternative-energy-low-poly/source/palette.png
+
+newmtl base_material.011
+Ns 1000.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 1
+map_Kd S:/Blender Projects/renewables/renewable-alternative-energy-low-poly/source/palette.png
+
+newmtl base_material.012
+Ns 1000.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 1
+map_Kd S:/Blender Projects/renewables/renewable-alternative-energy-low-poly/source/palette.png
+
+newmtl base_material.013
+Ns 1000.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 1
+map_Kd S:/Blender Projects/renewables/renewable-alternative-energy-low-poly/source/palette.png
+
+newmtl base_material.014
+Ns 1000.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 1
+map_Kd S:/Blender Projects/renewables/renewable-alternative-energy-low-poly/source/palette.png
+
+newmtl base_material.015
+Ns 1000.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 1
+map_Kd S:/Blender Projects/renewables/renewable-alternative-energy-low-poly/source/palette.png
+
+newmtl base_material.016
+Ns 1000.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 1
+map_Kd S:/Blender Projects/renewables/renewable-alternative-energy-low-poly/source/palette.png
+
+newmtl base_material.017
+Ns 1000.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 1
+map_Kd S:/Blender Projects/renewables/renewable-alternative-energy-low-poly/source/palette.png
+
+newmtl base_material.019
+Ns 1000.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 1
+map_Kd S:/Blender Projects/renewables/renewable-alternative-energy-low-poly/source/palette.png
+
+newmtl base_material.020
+Ns 1000.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 1
+map_Kd S:/Blender Projects/renewables/renewable-alternative-energy-low-poly/source/palette.png
+
+newmtl base_material.021
+Ns 1000.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 1
+map_Kd S:/Blender Projects/renewables/renewable-alternative-energy-low-poly/source/palette.png
+
+newmtl base_material.022
+Ns 1000.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 1
+map_Kd S:/Blender Projects/renewables/renewable-alternative-energy-low-poly/source/palette.png
+
+newmtl base_material.023
+Ns 1000.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 1
+map_Kd S:/Blender Projects/renewables/renewable-alternative-energy-low-poly/source/palette.png

@@ -1,0 +1,60 @@
+#version 430 core
+#define FORMAT_QUALIFIER rgba8
+
+layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
+
+uniform sampler2DArray heightmap;
+
+layout(FORMAT_QUALIFIER, binding = 1) uniform writeonly image2DArray normalMap;
+
+uniform ivec3 nodePos;
+uniform int layerIndex;
+
+#include "common/CoordinateConversion"
+
+float sampleHeight(ivec2 coord, ivec2 size, int layer) {
+    ivec2 clamped = clamp(coord, ivec2(0), size - ivec2(1));
+    return texelFetch(heightmap, ivec3(clamped, layer), 0).r;
+}
+
+void main() {
+    ivec2 texelCoord = ivec2(gl_GlobalInvocationID.xy);
+    ivec2 texSize = imageSize(normalMap).xy;
+    if (texelCoord.x >= texSize.x || texelCoord.y >= texSize.y) return;
+
+    // 3x3 Sobel sampling
+    float h00 = sampleHeight(texelCoord + ivec2(-1, -1), texSize, layerIndex);
+    float h10 = sampleHeight(texelCoord + ivec2( 0, -1), texSize, layerIndex);
+    float h20 = sampleHeight(texelCoord + ivec2( 1, -1), texSize, layerIndex);
+    float h01 = sampleHeight(texelCoord + ivec2(-1,  0), texSize, layerIndex);
+    float h21 = sampleHeight(texelCoord + ivec2( 1,  0), texSize, layerIndex);
+    float h02 = sampleHeight(texelCoord + ivec2(-1,  1), texSize, layerIndex);
+    float h12 = sampleHeight(texelCoord + ivec2( 0,  1), texSize, layerIndex);
+    float h22 = sampleHeight(texelCoord + ivec2( 1,  1), texSize, layerIndex);
+
+    float deltaHeightX = ((h20 + 2.0 * h21 + h22) - (h00 + 2.0 * h01 + h02)) / 4.0;
+    float deltaHeightY = ((h02 + 2.0 * h12 + h22) - (h00 + 2.0 * h10 + h20)) / 4.0;
+
+    vec2 localUV = (vec2(texelCoord) + 0.5) / vec2(texSize);
+    vec2 lonLat = quadTreeNodeToGeoPos(nodePos, localUV);
+    float latitude = lonLat.y;
+
+    float texelsPerMapSide = texSize.x * pow(2.0, nodePos.z);
+    float texelMeters = (GLOBE_CIRCUMFERENCE * cos(latitude)) / texelsPerMapSide;
+    float totalDistance = texelMeters * 2.0;
+
+    float dX = deltaHeightX / totalDistance;
+    float dY = deltaHeightY / totalDistance;
+
+    vec3 normalTS = normalize(vec3(-dX, -dY, 1.0));
+
+    vec3 baseNormal = vec3(cos(lonLat.y) * sin(lonLat.x), -cos(lonLat.y) * cos(lonLat.x), sin(lonLat.y));
+    vec3 baseTangent = normalize(cross(vec3(0.0, 0.0, 1.0), baseNormal));
+    vec3 baseBitangent = cross(baseNormal, baseTangent);
+    mat3 TBN = mat3(baseTangent, baseBitangent, baseNormal);
+
+    vec3 worldNormal = normalize(TBN * normalTS);
+
+    vec3 packedNormal = worldNormal * 0.5 + 0.5;
+    imageStore(normalMap, ivec3(texelCoord, layerIndex), vec4(packedNormal, 1.0));
+}

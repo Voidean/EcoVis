@@ -1,0 +1,41 @@
+#version 430 core
+#define FORMAT_QUALIFIER rgba8
+
+layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
+
+struct SplitJob {
+    int destLayer;
+    int srcLayer;
+    float uvScale;
+    int pad;
+    vec2 uvOffset;
+    vec2 pad2;
+};
+
+layout(std430, binding = 0) readonly buffer SplitJobsBlock {
+    SplitJob jobs[];
+};
+
+uniform sampler2DArray sourceArray;
+layout(FORMAT_QUALIFIER, binding = 1) uniform writeonly image2DArray destArray;
+
+void main() {
+    uint job_idx = gl_WorkGroupID.z;
+    SplitJob job = jobs[job_idx];
+
+    ivec2 texelCoord = ivec2(gl_GlobalInvocationID.xy);
+    ivec2 texSize = imageSize(destArray).xy;
+
+    if (texelCoord.x >= texSize.x || texelCoord.y >= texSize.y) return;
+
+    // Map destination texel coordinate to standard normalized UV
+    vec2 destUV = (vec2(texelCoord) + 0.5) / vec2(texSize);
+
+    vec2 srcUV;
+    srcUV.x = job.uvOffset.x + (destUV.x * job.uvScale);
+    srcUV.y = 1.0 - job.uvOffset.y - ((1.0 - destUV.y) * job.uvScale);
+
+    // Bilinear sample from the shared ancestor layer
+    vec4 color = texture(sourceArray, vec3(srcUV, job.srcLayer));
+    imageStore(destArray, ivec3(texelCoord, job.destLayer), color);
+}

@@ -1,0 +1,107 @@
+#version 430 core
+
+layout(local_size_x = 256) in; // Process 256 particles per work group
+
+#include "common/ParticleBuffer" (BINDING=0)
+#include "common/MapTileBuffer" (BINDING=1)
+
+layout(std430, binding = 2) writeonly buffer PolarIndices {
+    uint polarParticleIndices[];
+};
+
+#include "common/IndirectArrayCommandBuffer" (BINDING=3)
+#include "common/CoordinateConversion"
+
+uniform sampler2D vectorUV; // R = U, G = V
+uniform float deltaTime;
+uniform float speedMultiplier;
+uniform float timeSeed;
+uniform int tileCount;
+
+const float baseSpeed = 0.1;
+
+vec3 hash33(vec3 p3) {
+    p3 = fract(p3 * vec3(.1031, .1030, .0973));
+    p3 += dot(p3, p3.yxz + 33.33);
+    return fract((p3.xxy + p3.yxx) * p3.zyx);
+}
+
+void main() {
+    uint idx = gl_GlobalInvocationID.x;
+    if (idx >= particles.length()) return;
+
+    Particle p = particles[idx];
+    p.lastPos = p.pos;
+
+    vec2 wind = texture(vectorUV, p.pos).rg;
+    wind = (wind * 2.0) - 1.0;
+
+    float lat = (p.pos.y - 0.5) * PI;
+
+    float cosLat = max(cos(lat), 0.001);
+    wind.x /= cosLat;
+
+    // Update Position
+    p.pos += wind * deltaTime * baseSpeed * speedMultiplier;
+
+    if (p.pos.y > 1.0) {
+        // Crossed the North Pole
+        p.pos.y = 2.0 - p.pos.y; // Reflect back down
+        p.pos.x += 0.5;          // Shift longitude 180 degrees
+    } else if (p.pos.y < 0.0) {
+        // Crossed the South Pole
+        p.pos.y = -p.pos.y;      // Reflect back up
+        p.pos.x += 0.5;          // Shift longitude 180 degrees
+    }
+
+    // Handle horizontal wrapping
+    p.pos.x = fract(p.pos.x);
+
+    // Update Life
+    p.life -= deltaTime * 0.25;
+
+    // Respawn if dead
+    if (p.life <= 0.0) {
+        // Generate random numbers
+        vec3 hashInput = vec3(p.seed, float(idx) * 0.001, timeSeed);
+        vec3 rands = hash33(hashInput);
+        vec3 nextRands = hash33(hashInput + vec3(1.0, 2.0, 3.0));
+
+        float poleProbability = POLE_CUTOFF_Y * 4.0;
+
+        if (rands.x < poleProbability) {
+            // SPAWN ON POLES
+            float isNorthRnd = rands.y;
+            float seedU      = rands.z;
+            float seedV      = nextRands.z;
+
+            if (isNorthRnd > 0.5) {
+                p.pos = vec2(seedU, 1.0 - (seedV * POLE_CUTOFF_Y));
+            } else {
+                p.pos = vec2(seedU, seedV * POLE_CUTOFF_Y);
+            }
+        } else {
+            // SPAWN ON LOD TILES
+            float seedTile = nextRands.z; // Repurpose the unused random value for the tile index
+            float seedU    = rands.y;
+            float seedV    = rands.z;
+
+            int tileIdx = min(int(seedTile * float(tileCount)), tileCount - 1);
+            ivec4 targetTile = nodePosLayer[tileIdx];
+
+            p.pos = geoPosToUv(quadTreeNodeToGeoPos(targetTile.xyz, vec2(seedU, seedV)));
+        }
+
+        p.lastPos = p.pos;
+
+        p.seed = nextRands.x;
+        p.life = 0.6 + (0.4 * nextRands.y);
+    }
+
+    particles[idx] = p;
+
+    if (p.pos.y <= POLE_CUTOFF_Y || p.pos.y >= 1.0 - POLE_CUTOFF_Y) {
+        uint slot = atomicAdd(drawCmd.count, 2) / 2;
+        polarParticleIndices[slot] = idx;
+    }
+}

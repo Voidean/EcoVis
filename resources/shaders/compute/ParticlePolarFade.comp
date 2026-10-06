@@ -1,0 +1,25 @@
+#version 430 core
+
+layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
+
+layout(r32f, binding = 0) uniform image2DArray polarTrailTexture;
+
+uniform float fadeAmount;
+
+void main() {
+    int targetLayer = int(gl_WorkGroupID.z);
+
+    ivec2 pixelCoords = ivec2(gl_GlobalInvocationID.xy);
+    ivec3 texelCoords = ivec3(pixelCoords, targetLayer);
+
+    // Safeguard in case invocation falls outside the 4096x4096 texture bounds
+    ivec2 texSize = imageSize(polarTrailTexture).xy;
+    if (pixelCoords.x >= texSize.x || pixelCoords.y >= texSize.y) return;
+
+    vec4 color = imageLoad(polarTrailTexture, texelCoords);
+    color.r *= fadeAmount;
+
+    if (color.r < 0.001) color.r = 0.0;
+
+    imageStore(polarTrailTexture, texelCoords, color);
+}

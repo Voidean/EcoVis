@@ -1,0 +1,49 @@
+#version 430 core
+#define FORMAT_QUALIFIER rgba8
+
+layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
+
+struct MergeJob {
+    int destLayer;
+    int srcTL;
+    int srcTR;
+    int srcBL;
+    int srcBR;
+    int pad[3];
+};
+
+layout(std430, binding = 0) readonly buffer MergeJobsBlock {
+    MergeJob jobs[];
+};
+
+uniform sampler2DArray sourceArray;
+layout(FORMAT_QUALIFIER, binding = 1) uniform writeonly image2DArray destArray;
+
+void main() {
+    uint job_idx = gl_WorkGroupID.z;
+    MergeJob job = jobs[job_idx];
+
+    ivec2 parentTexelCoord = ivec2(gl_GlobalInvocationID.xy);
+    ivec2 parentSize = imageSize(destArray).xy;
+
+    if (parentTexelCoord.x >= parentSize.x || parentTexelCoord.y >= parentSize.y) return;
+
+    // Identify which quadrant this destination texel matches
+    ivec2 halfSize = parentSize / 2;
+    int quadX = parentTexelCoord.x / halfSize.x;
+    int quadY = parentTexelCoord.y / halfSize.y;
+
+    // Extract local position within the quadrant and scale it up to fill child bounds
+    ivec2 childTexelCoord = (parentTexelCoord % halfSize) * 2;
+    vec2 childUV = (vec2(childTexelCoord) + 0.5) / vec2(parentSize);
+
+    // Map source layer using standard texture coordinates context orientation
+    int src_layer = 0;
+    if      (quadX == 0 && quadY == 1) src_layer = job.srcTL; // Top-Left
+    else if (quadX == 1 && quadY == 1) src_layer = job.srcTR; // Top-Right
+    else if (quadX == 0 && quadY == 0) src_layer = job.srcBL; // Bottom-Left
+    else if (quadX == 1 && quadY == 0) src_layer = job.srcBR; // Bottom-Right
+
+    vec4 color = texture(sourceArray, vec3(childUV, src_layer));
+    imageStore(destArray, ivec3(parentTexelCoord, job.destLayer), color);
+}
