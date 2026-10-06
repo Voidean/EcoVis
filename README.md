@@ -1,12 +1,18 @@
 # EcoVis
 
-An interactive OpenGL-based visualization tool for weather and energy production data. The application allows users to explore temporal weather datasets, energy infrastructure, and power generation data on both a 3D globe and multiple flat map projections.
+An interactive OpenGL-based visualization and analysis tool for weather and energy production data. The application allows users to explore temporal weather datasets, energy infrastructure, and power generation data on both a 3D globe and multiple flat map projections and variable grid resolutions.
+
+## Attributions
+#### Core Developers
+- Max Bennedik
+- Moritz Dietrich
+#### Tech Lead/Supervisor
+- Jan Schneegans
 
 ## Requirements
 
+All Python dependencies can be found in [`pyproject.toml`](pyproject.toml).  
 The project is written in Python 3.12. Other Python versions may cause issues.
-
-All Python dependencies can be found in [`pyproject.toml`](pyproject.toml).
 
 ### Supported Operating Systems
 
